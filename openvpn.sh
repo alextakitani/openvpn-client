@@ -85,8 +85,8 @@ timezone() { local timezone="${1:-EST5EDT}"
 #   user) user name on VPN
 #   pass) password on VPN
 # Return: configured .ovpn file
-vpn() { local server="$1" user="$2" pass="$3" \
-            conf="/vpn/vpn.conf" auth="/vpn/vpn.auth"
+vpn() { local server="$1" \
+            conf="/vpn/vpn.conf"
 
     cat >$conf <<-EOF
 		client
@@ -94,23 +94,22 @@ vpn() { local server="$1" user="$2" pass="$3" \
 		proto udp
 		remote $server 1194
 		resolv-retry infinite
+		status          current_status
+		resolv-retry    infinite
+		ns-cert-type    server
+		topology        subnet
+		verb            3
+		cipher          BF-CBC
+		keysize               128
+		ca              /vpn/ca.crt
+		cert            /vpn/client1.crt
+		key             /vpn/client1.key
+		tls-auth        /vpn/ta.key 1
 		nobind
 		persist-key
 		persist-tun
-		ca /vpn/vpn-ca.crt
-		tls-client
-		remote-cert-tls server
-		auth-user-pass
 		comp-lzo
-		verb 1
-		reneg-sec 0
-		redirect-gateway def1
-		auth-user-pass $auth
-		EOF
-
-    echo "$user" >$auth
-    echo "$pass" >>$auth
-    chmod 0600 $auth
+		EOF    
 }
 
 ### vpnportforward: setup vpn port forwarding
